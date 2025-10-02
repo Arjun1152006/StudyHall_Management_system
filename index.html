@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Hall Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4a6fa5"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="StudyHall">
+    <meta name="msapplication-TileColor" content="#4a6fa5">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #e8f0fe;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --success-light: #e8f5e9;
+            --danger: #dc3545;
+            --danger-light: #fdecea;
+            --warning: #ffc107;
+            --warning-light: #fff8e1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        body { 
+            background: #f4f6f9; 
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container { 
+            display: flex; 
+            height: 100vh; 
+        }
+        
+        .sidebar { 
+            width: 250px; 
+            background: white; 
+            color: var(--dark); 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            z-index: 10;
+        }
+        
+        .sidebar h2 { 
+            text-align: center; 
+            padding: 20px 0; 
+            border-bottom: 1px solid var(--light-gray); 
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .sidebar a { 
+            padding: 15px 20px; 
+            color: var(--dark); 
+            text-decoration: none; 
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar a:hover,
+        .sidebar a.active { 
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .sidebar a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main { 
+            flex: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            background: #f4f6f9;
+        }
+        
+        .page { 
+            display: none; 
+        }
+        
+        .active { 
+            display: block; 
+        }
+        
+        .cards { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 20px; 
+        }
+        
+        .card { 
+            flex: 1; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .card h3 { 
+            margin-bottom: 10px; 
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .card p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        table, th, td { 
+            border: 1px solid var(--light-gray); 
+        }
+        
+        th, td { 
+            padding: 12px 15px; 
+            text-align: left; 
+        }
+        
+        th { 
+            background: var(--primary-light); 
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        
+        th:hover {
+            background: #dbe6f6;
+        }
+        
+        th.sortable:after {
+            content: "↕";
+            margin-left: 5px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+        
+        th.sort-asc:after {
+            content: "↑";
+            opacity: 1;
+        }
+        
+        th.sort-desc:after {
+            content: "↓";
+            opacity: 1;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tr:hover {
+            background: var(--primary-light);
+        }
+        
+        .status-paid { 
+            color: var(--success); 
+            font-weight: bold; 
+            background: var(--success-light);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .status-pending { 
+            color: var(--danger); 
+            font-weight: bold; 
+            background: var(--danger-light);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .status-left { 
+            color: var(--gray); 
+            font-weight: bold; 
+            background: var(--light-gray);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .action-buttons { 
+            display: flex; 
+            gap: 5px; 
+        }
+        
+        .action-btn { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+        }
+        
+        .btn-primary:hover {
+            background: #3a5a80;
+        }
+        
+        .btn-danger { 
+            background: var(--danger); 
+            color: white; 
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        form { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: var(--card-shadow); 
+            max-width: 600px; 
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        form input, form select, form textarea { 
+            width: 100%; 
+            padding: 12px 15px; 
+            margin: 5px 0; 
+            border: 1px solid var(--light-gray); 
+            border-radius: 5px; 
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        form input:focus, form select:focus, form textarea:focus { 
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+        }
+        
+        form button { 
+            background: var(--primary); 
+            color: white; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        form button:hover { 
+            background: #3a5a80; 
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .page-header h1 {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .search-sort-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid var(--light-gray);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .sort-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .sort-options select {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 5px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            color: var(--light-gray);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* PWA-specific styles */
+        @media (display-mode: standalone) {
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-top: 1px solid var(--light-gray);
+                z-index: 1000;
+            }
+            
+            .mobile-nav-item {
+                flex: 1;
+                text-align: center;
+                padding: 12px 5px;
+                text-decoration: none;
+                color: var(--gray);
+                font-size: 12px;
+            }
+            
+            .mobile-nav-item.active {
+                color: var(--primary);
+            }
+            
+            .mobile-nav-item i {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 18px;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .main {
+                margin-left: 0;
+                padding-bottom: 70px;
+            }
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            }
+            
+            .sidebar h2 {
+                display: none;
+            }
+            
+            .sidebar a {
+                flex: 1;
+                min-width: 70px;
+                text-align: center;
+                padding: 12px 5px;
+                border-left: none;
+                border-top: 3px solid transparent;
+                font-size: 12px;
+            }
+            
+            .sidebar a:hover, 
+            .sidebar a.active {
+                border-left: none;
+                border-top: 3px solid var(--primary);
+                background: var(--primary-light);
+            }
+            
+            .sidebar a i {
+                margin-right: 0;
+                display: block;
+                margin-bottom: 5px;
+                font-size: 18px;
+            }
+            
+            .main {
+                margin-bottom: 70px;
+                padding: 15px;
+                width: 100%;
+            }
+            
+            .cards {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .card {
+                margin-bottom: 0;
+            }
+            
+            table {
+                font-size: 14px;
+                display: block;
+                overflow-x: auto;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+                white-space: nowrap;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .action-btn {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .search-sort-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            form button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Very small devices */
+        @media (max-width: 480px) {
+            .card p {
+                font-size: 1.5rem;
+            }
+            
+            .card-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            th, td {
+                padding: 6px 3px;
+                font-size: 12px;
+            }
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffc107;
+            color: #856404;
+            padding: 10px;
+            text-align: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: var(--hover-shadow);
+            z-index: 2000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Offline Indicator -->
+<div class="offline-indicator" id="offlineIndicator">
+    <i class="fas fa-wifi"></i> You are currently offline
+</div>
+
+<!-- Notification -->
+<div class="notification" id="notification"></div>
+
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2><i class="fas fa-graduation-cap"></i> Study Hall Manager</h2>
+        <a href="#" class="active" onclick="showPage('dashboardPage')"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" onclick="showPage('studentsPage')"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="#" onclick="showPage('studyHallsPage')"><i class="fas fa-building"></i> Study Halls</a>
+        <a href="#" onclick="showPage('reportsPage')"><i class="fas fa-chart-line"></i> Reports</a>
+        <a href="#" onclick="showPage('upcomingFeesPage')"><i class="fas fa-calendar-alt"></i> Upcoming Fees</a>
+        <a href="#" onclick="showPage('addStudentPage')"><i class="fas fa-user-plus"></i> Add Student</a>
+        <a href="#" onclick="showPage('addHallPage')"><i class="fas fa-plus-square"></i> Add Hall</a>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-nav" id="mobileNav" style="display: none;">
+        <a href="#" class="mobile-nav-item active" onclick="showPage('dashboardPage'); setActiveNav('dashboard'); return false;">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="showPage('studentsPage'); setActiveNav('students'); return false;">
+            <i class="fas fa-user-graduate"></i>
+            <span>Students</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="showPage('studyHallsPage'); setActiveNav('halls'); return false;">
+            <i class="fas fa-building"></i>
+            <span>Halls</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="showPage('upcomingFeesPage'); setActiveNav('fees'); return false;">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Fees</span>
+        </a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="page active">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Welcome to Study Hall Management System</p>
+            </div>
+            
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Total Students</h3>
+                    <p id="totalStudents">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>Total Study Halls</h3>
+                    <p id="totalHalls">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3>Total Fees Collected</h3>
+                    <p id="totalFees">₹ 0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h3>Pending Fees</h3>
+                    <p id="pendingFees">₹ 0</p>
+                </div>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Active Students</h3>
+                    <p id="activeStudents">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <h3>Left Students</h3>
+                    <p id="leftStudents">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Monthly Fee Due</h3>
+                    <p id="monthlyFeeTotal">₹ 0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Fee Actions</h3>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-primary" onclick="calculateMonthlyFees()" style="width: 100%; margin-bottom: 5px;">
+                            <i class="fas fa-calculator"></i> Calculate Fees
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page-header">
+                <h3>Recent Students</h3>
+                <button class="btn-primary" onclick="showPage('studentsPage')">
+                    <i class="fas fa-list"></i> View All
+                </button>
+            </div>
+            
+            <div id="recentStudentsLoading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Loading recent students...</p>
+            </div>
+            
+            <table id="recentStudentsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Cabin</th>
+                        <th>Hall</th>
+                        <th>Join Date</th>
+                        <th>Monthly Fee</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recentStudentsTableBody">
+                    <!-- Recent students will be populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="recentStudentsEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-user-graduate"></i>
+                <h3>No Students Added Yet</h3>
+                <p>Add your first student to see them here</p>
+                <button class="btn-primary" onclick="showPage('addStudentPage')">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </button>
+            </div>
+        </div>
+
+        <!-- Students -->
+        <div id="studentsPage" class="page">
+            <div class="page-header">
+                <h1>All Students</h1>
+                <button class="btn-primary" onclick="showPage('addStudentPage')">
+                    <i class="fas fa-user-plus"></i> Add New Student
+                </button>
+            </div>
+            
+            <div class="search-sort-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="studentSearch" placeholder="Search students by name, cabin, hall, or phone..." onkeyup="filterStudents()">
+                </div>
+                <div class="sort-options">
+                    <select id="sortBy" onchange="sortStudents()">
+                        <option value="name">Sort by Name</option>
+                        <option value="cabin">Sort by Cabin</option>
+                        <option value="hall">Sort by Hall</option>
+                        <option value="fee_paid">Sort by Fee Paid</option>
+                        <option value="fee_due">Sort by Fee Due</option>
+                        <option value="status">Sort by Status</option>
+                        <option value="join_date">Sort by Join Date</option>
+                    </select>
+                    <select id="sortOrder" onchange="sortStudents()">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="studentsLoading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Loading students...</p>
+            </div>
+            
+            <table id="studentsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('name')">Name</th>
+                        <th class="sortable" onclick="sortTable('cabin')">Cabin</th>
+                        <th class="sortable" onclick="sortTable('hall')">Hall</th>
+                        <th class="sortable" onclick="sortTable('phone')">Phone</th>
+                        <th class="sortable" onclick="sortTable('join_date')">Join Date</th>
+                        <th class="sortable" onclick="sortTable('monthly_fee')">Monthly Fee</th>
+                        <th class="sortable" onclick="sortTable('fee_paid')">Fee Paid</th>
+                        <th class="sortable" onclick="sortTable('fee_due')">Fee Due</th>
+                        <th class="sortable" onclick="sortTable('status')">Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody"></tbody>
+            </table>
+            <div id="studentsEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-user-graduate"></i>
+                <h3>No Students Added Yet</h3>
+                <p>Get started by adding your first student</p>
+                <button class="btn-primary" onclick="showPage('addStudentPage')">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </button>
+            </div>
+            <div id="studentsNoResults" class="empty-state" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No Students Found</h3>
+                <p>Try adjusting your search criteria</p>
+            </div>
+        </div>
+
+        <!-- Study Halls -->
+        <div id="studyHallsPage" class="page">
+            <div class="page-header">
+                <h1>Study Halls</h1>
+                <button class="btn-primary" onclick="showPage('addHallPage')">
+                    <i class="fas fa-plus-square"></i> Add New Hall
+                </button>
+            </div>
+            
+            <div id="hallsLoading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Loading study halls...</p>
+            </div>
+            
+            <table id="hallsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Capacity</th>
+                        <th>Current Students</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="hallsTableBody"></tbody>
+            </table>
+            <div id="hallsEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-building"></i>
+                <h3>No Study Halls Added Yet</h3>
+                <p>Get started by adding your first study hall</p>
+                <button class="btn-primary" onclick="showPage('addHallPage')">
+                    <i class="fas fa-plus-square"></i> Add Study Hall
+                </button>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div id="reportsPage" class="page">
+            <div class="page-header">
+                <h1>Reports & Analytics</h1>
+                <button class="btn-primary" id="exportReportBtn">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+            
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Total Students</h3>
+                    <p id="reportTotalStudents">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>Total Halls</h3>
+                    <p id="reportTotalHalls">0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3>Total Fees Collected</h3>
+                    <p id="reportTotalFees">₹ 0</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h3>Pending Fees</h3>
+                    <p id="reportPendingFees">₹ 0</p>
+                </div>
+            </div>
+            
+            <div class="page-header">
+                <h3>Fee Collection Status</h3>
+            </div>
+            
+            <div id="feeReportLoading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Loading fee collection data...</p>
+            </div>
+            
+            <table id="feeReportTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Hall</th>
+                        <th>Total Students</th>
+                        <th>Fees Collected</th>
+                        <th>Fees Pending</th>
+                        <th>Collection Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="feeReportTableBody"></tbody>
+            </table>
+            <div id="feeReportEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-chart-bar"></i>
+                <h3>No Data Available</h3>
+                <p>Add students and study halls to see reports</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Fees -->
+        <div id="upcomingFeesPage" class="page">
+            <div class="page-header">
+                <h1>Upcoming Fee Due Dates</h1>
+                <button class="btn-primary" onclick="showPage('dashboardPage')">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+            
+            <div id="upcomingFeesLoading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Loading upcoming fees...</p>
+            </div>
+            
+            <table id="upcomingFeesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Hall</th>
+                        <th>Monthly Fee</th>
+                        <th>Current Due</th>
+                        <th>Next Fee Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="upcomingFeesTableBody"></tbody>
+            </table>
+            <div id="upcomingFeesEmpty" class="empty-state" style="display: none;">
+                <i class="fas fa-calendar-check"></i>
+                <h3>No Upcoming Fees</h3>
+                <p>All fees are up to date</p>
+            </div>
+        </div>
+
+        <!-- Add Student -->
+        <div id="addStudentPage" class="page">
+            <div class="page-header">
+                <h1 id="studentFormTitle">Add Student</h1>
+                <button class="btn-primary" onclick="showPage('studentsPage')">
+                    <i class="fas fa-arrow-left"></i> Back to Students
+                </button>
+            </div>
+            
+            <form id="addStudentForm">
+                <input type="hidden" id="editStudentId">
+                <div class="form-group">
+                    <label for="studentName">Full Name</label>
+                    <input type="text" id="studentName" placeholder="Student Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="cabinNumber">Cabin Number</label>
+                    <input type="text" id="cabinNumber" placeholder="Cabin Number" required>
+                </div>
+                <div class="form-group">
+                    <label for="studyHall">Study Hall</label>
+                    <select id="studyHall" required>
+                        <option value="">Select Study Hall</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="Phone Number" required>
+                </div>
+                <div class="form-group">
+                    <label for="joinDate">Join Date</label>
+                    <input type="date" id="joinDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="monthlyFee">Monthly Fee (₹)</label>
+                    <input type="number" id="monthlyFee" placeholder="Monthly Fee" value="2000">
+                </div>
+                <div class="form-group">
+                    <label for="feePaid">Fee Paid (₹)</label>
+                    <input type="number" id="feePaid" placeholder="Fee Paid" required>
+                </div>
+                <div class="form-group">
+                    <label for="feeDue">Fee Due (₹)</label>
+                    <input type="number" id="feeDue" placeholder="Fee Due" required>
+                </div>
+                <div class="form-group">
+                    <label for="leftDate">Left Date (if applicable)</label>
+                    <input type="date" id="leftDate">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-warning" onclick="showPage('studentsPage')">Cancel</button>
+                    <button type="submit" class="btn-success">Save Student</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Add/Edit Hall -->
+        <div id="addHallPage" class="page">
+            <div class="page-header">
+                <h1 id="hallFormTitle">Add Study Hall</h1>
+                <button class="btn-primary" onclick="showPage('studyHallsPage')">
+                    <i class="fas fa-arrow-left"></i> Back to Study Halls
+                </button>
+            </div>
+            
+            <form id="addHallForm">
+                <input type="hidden" id="editHallId">
+                <div class="form-group">
+                    <label for="hallName">Hall Name</label>
+                    <input type="text" id="hallName" placeholder="Hall Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="hallCapacity">Capacity</label>
+                    <input type="number" id="hallCapacity" placeholder="Capacity" required>
+                </div>
+                <div class="form-group">
+                    <label for="hallLocation">Location</label>
+                    <input type="text" id="hallLocation" placeholder="Location" required>
+                </div>
+                <div class="form-group">
+                    <label for="hallDescription">Description</label>
+                    <textarea id="hallDescription" placeholder="Description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-warning" onclick="showPage('studyHallsPage')">Cancel</button>
+                    <button type="submit" class="btn-success">Save Hall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // API base URL
+    const API_BASE = window.location.origin + '/api';
+    
+    let students = [];
+    let studyHalls = [];
+    let currentSort = { field: 'name', order: 'asc' };
+    let filteredStudents = [];
+
+    // DOM Elements
+    const totalStudentsEl = document.getElementById('totalStudents');
+    const totalHallsEl = document.getElementById('totalHalls');
+    const totalFeesEl = document.getElementById('totalFees');
+    const pendingFeesEl = document.getElementById('pendingFees');
+    const activeStudentsEl = document.getElementById('activeStudents');
+    const leftStudentsEl = document.getElementById('leftStudents');
+    const monthlyFeeTotalEl = document.getElementById('monthlyFeeTotal');
+    const studentsTableBody = document.getElementById('studentsTableBody');
+    const recentStudentsTableBody = document.getElementById('recentStudentsTableBody');
+    const hallsTableBody = document.getElementById('hallsTableBody');
+    const addStudentForm = document.getElementById('addStudentForm');
+    const addHallForm = document.getElementById('addHallForm');
+    const studyHallSelect = document.getElementById('studyHall');
+    const feeReportTableBody = document.getElementById('feeReportTableBody');
+    const exportReportBtn = document.getElementById('exportReportBtn');
+    const upcomingFeesTableBody = document.getElementById('upcomingFeesTableBody');
+    const notification = document.getElementById('notification');
+
+    // Helper function for API calls
+    async function apiCall(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned non-JSON response');
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API call failed:', error);
+            showNotification('Error: ' + error.message, 'error');
+            throw error;
+        }
+    }
+
+    // Show notification
+    function showNotification(message, type = 'success') {
+        notification.textContent = message;
+        notification.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
+    // PWA functionality
+    let deferredPrompt;
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('SW registered: ', registration);
+                })
+                .catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+        });
+    }
+
+    // Detect if app is running in standalone mode
+    function isRunningStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true;
+    }
+
+    // Update UI for standalone mode
+    function updateUIForStandalone() {
+        if (isRunningStandalone()) {
+            document.getElementById('mobileNav').style.display = 'flex';
+            document.querySelector('.sidebar').style.display = 'none';
+            document.querySelector('.main').style.marginLeft = '0';
+        }
+    }
+
+    // Set active navigation item
+    function setActiveNav(page) {
+        document.querySelectorAll('.mobile-nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelectorAll('.sidebar a').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Activate mobile nav item
+        const activeNavItem = Array.from(document.querySelectorAll('.mobile-nav-item'))
+            .find(item => item.textContent.includes(getNavText(page)));
+        if (activeNavItem) {
+            activeNavItem.classList.add('active');
+        }
+        
+        // Activate sidebar item (for when not in standalone)
+        const activeSidebarItem = Array.from(document.querySelectorAll('.sidebar a'))
+            .find(item => item.textContent.includes(getNavText(page)));
+        if (activeSidebarItem && !isRunningStandalone()) {
+            activeSidebarItem.classList.add('active');
+        }
+    }
+
+    function getNavText(page) {
+        const navMap = {
+            'dashboardPage': 'Dashboard',
+            'studentsPage': 'Students',
+            'studyHallsPage': 'Study Halls',
+            'upcomingFeesPage': 'Upcoming Fees',
+            'reportsPage': 'Reports'
+        };
+        return navMap[page] || '';
+    }
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        
+        if (pageId === 'dashboardPage') {
+            updateDashboard();
+            updateDashboardStats();
+        } else if (pageId === 'studentsPage') {
+            loadStudents();
+        } else if (pageId === 'studyHallsPage') {
+            loadStudyHalls();
+        } else if (pageId === 'reportsPage') {
+            updateReports();
+        } else if (pageId === 'upcomingFeesPage') {
+            loadUpcomingFees();
+        } else if (pageId === 'addStudentPage') {
+            loadStudyHallsForSelect();
+        }
+        
+        setActiveNav(pageId);
+    }
+
+    async function updateDashboard() {
+        try {
+            // Load dashboard data
+            const dashboardData = await apiCall('/dashboard');
+            
+            totalStudentsEl.textContent = dashboardData.totalStudents;
+            totalHallsEl.textContent = dashboardData.totalHalls;
+            totalFeesEl.textContent = `₹ ${dashboardData.totalFees}`;
+            pendingFeesEl.textContent = `₹ ${dashboardData.pendingFees}`;
+            
+            // Load recent students
+            await loadRecentStudents();
+        } catch (error) {
+            console.error('Error updating dashboard:', error);
+        }
+    }
+
+    async function updateDashboardStats() {
+        try {
+            const dashboardData = await apiCall('/dashboard');
+            
+            activeStudentsEl.textContent = dashboardData.activeStudents;
+            leftStudentsEl.textContent = dashboardData.leftStudents;
+            monthlyFeeTotalEl.textContent = `₹ ${dashboardData.monthlyFeeTotal}`;
+        } catch (error) {
+            console.error('Error updating dashboard stats:', error);
+        }
+    }
+
+    async function loadRecentStudents() {
+        try {
+            document.getElementById('recentStudentsLoading').style.display = 'block';
+            document.getElementById('recentStudentsTable').style.display = 'none';
+            document.getElementById('recentStudentsEmpty').style.display = 'none';
+            
+            const recentStudents = await apiCall('/students/recent');
+            
+            document.getElementById('recentStudentsLoading').style.display = 'none';
+            
+            if (recentStudents.length === 0) {
+                document.getElementById('recentStudentsEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('recentStudentsTable').style.display = 'table';
+            recentStudentsTableBody.innerHTML = '';
+            
+            recentStudents.forEach(st => {
+                const statusClass = st.left_date ? 'status-left' : (st.status === 'Paid' ? 'status-paid' : 'status-pending');
+                const statusText = st.left_date ? 'Left' : st.status;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${st.name}</td>
+                    <td>${st.cabin}</td>
+                    <td>${st.hall}</td>
+                    <td>${formatDate(st.join_date)}</td>
+                    <td>₹ ${st.monthly_fee || 0}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="editStudent(${st.id})"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn btn-danger" onclick="deleteStudent(${st.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                recentStudentsTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading recent students:', error);
+            document.getElementById('recentStudentsLoading').style.display = 'none';
+        }
+    }
+
+    async function loadStudents() {
+        try {
+            document.getElementById('studentsLoading').style.display = 'block';
+            document.getElementById('studentsTable').style.display = 'none';
+            document.getElementById('studentsEmpty').style.display = 'none';
+            document.getElementById('studentsNoResults').style.display = 'none';
+            
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            students = await apiCall(`/students?sortBy=${sortBy}&sortOrder=${sortOrder}`);
+            
+            document.getElementById('studentsLoading').style.display = 'none';
+            
+            if (students.length === 0) {
+                document.getElementById('studentsEmpty').style.display = 'block';
+                return;
+            }
+            
+            filteredStudents = [...students];
+            displayStudents(filteredStudents);
+        } catch (error) {
+            console.error('Error loading students:', error);
+            document.getElementById('studentsLoading').style.display = 'none';
+        }
+    }
+
+    function displayStudents(studentsToDisplay) {
+        studentsTableBody.innerHTML = '';
+        
+        if (studentsToDisplay.length === 0) {
+            document.getElementById('studentsTable').style.display = 'none';
+            document.getElementById('studentsNoResults').style.display = 'block';
+            return;
+        }
+        
+        document.getElementById('studentsTable').style.display = 'table';
+        document.getElementById('studentsNoResults').style.display = 'none';
+        
+        studentsToDisplay.forEach(st => {
+            const statusClass = st.left_date ? 'status-left' : (st.status === 'Paid' ? 'status-paid' : 'status-pending');
+            const statusText = st.left_date ? 'Left' : st.status;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${st.name}</td>
+                <td>${st.cabin}</td>
+                <td>${st.hall}</td>
+                <td>${st.phone}</td>
+                <td>${formatDate(st.join_date)}</td>
+                <td>₹ ${st.monthly_fee || 0}</td>
+                <td>₹ ${st.fee_paid}</td>
+                <td>₹ ${st.fee_due}</td>
+                <td class="${statusClass}">${statusText}</td>
+                <td class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="editStudent(${st.id})"><i class="fas fa-edit"></i></button>
+                    ${!st.left_date ? `
+                        <button class="action-btn btn-warning" onclick="markStudentLeft(${st.id})"><i class="fas fa-sign-out-alt"></i></button>
+                    ` : `
+                        <button class="action-btn btn-success" onclick="reactivateStudent(${st.id})"><i class="fas fa-user-plus"></i></button>
+                    `}
+                    <button class="action-btn btn-danger" onclick="deleteStudent(${st.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            studentsTableBody.appendChild(row);
+        });
+        
+        updateSortIndicators();
+    }
+
+    async function filterStudents() {
+        const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+        
+        if (searchTerm === '') {
+            filteredStudents = [...students];
+        } else {
+            filteredStudents = students.filter(student => 
+                student.name.toLowerCase().includes(searchTerm) ||
+                student.cabin.toLowerCase().includes(searchTerm) ||
+                student.hall.toLowerCase().includes(searchTerm) ||
+                student.phone.includes(searchTerm)
+            );
+        }
+        
+        displayStudents(filteredStudents);
+    }
+
+    function sortStudents() {
+        loadStudents(); // Reload with new sort parameters
+    }
+
+    function sortTable(field) {
+        // Toggle sort order if clicking the same field
+        if (currentSort.field === field) {
+            currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.field = field;
+            currentSort.order = 'asc';
+        }
+        
+        // Update dropdowns to match
+        document.getElementById('sortBy').value = field;
+        document.getElementById('sortOrder').value = currentSort.order;
+        
+        sortStudents();
+    }
+
+    function updateSortIndicators() {
+        // Remove all sort classes
+        document.querySelectorAll('th').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
+        
+        // Add appropriate class to current sort column
+        const header = Array.from(document.querySelectorAll('th')).find(th => 
+            th.textContent.toLowerCase().includes(currentSort.field.toLowerCase())
+        );
+        
+        if (header) {
+            header.classList.add(currentSort.order === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+    }
+
+    async function loadStudyHalls() {
+        try {
+            document.getElementById('hallsLoading').style.display = 'block';
+            document.getElementById('hallsTable').style.display = 'none';
+            document.getElementById('hallsEmpty').style.display = 'none';
+            
+            studyHalls = await apiCall('/study-halls');
+            
+            document.getElementById('hallsLoading').style.display = 'none';
+            
+            if (studyHalls.length === 0) {
+                document.getElementById('hallsEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('hallsTable').style.display = 'table';
+            hallsTableBody.innerHTML = '';
+            
+            // Get student counts for each hall
+            const studentCounts = {};
+            students.forEach(student => {
+                studentCounts[student.hall] = (studentCounts[student.hall] || 0) + 1;
+            });
+            
+            studyHalls.forEach(hall => {
+                const studentsInHall = studentCounts[hall.name] || 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${hall.name}</td>
+                    <td>${hall.capacity}</td>
+                    <td>${studentsInHall}</td>
+                    <td>${hall.location}</td>
+                    <td class="status-paid">Active</td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="editHall(${hall.id})"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn btn-danger" onclick="deleteHall(${hall.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                hallsTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading study halls:', error);
+            document.getElementById('hallsLoading').style.display = 'none';
+        }
+    }
+
+    async function loadStudyHallsForSelect() {
+        try {
+            studyHalls = await apiCall('/study-halls');
+            populateStudyHallSelect();
+        } catch (error) {
+            console.error('Error loading study halls for select:', error);
+        }
+    }
+
+    function populateStudyHallSelect() {
+        studyHallSelect.innerHTML = '<option value="">Select Study Hall</option>';
+        studyHalls.forEach(hall => {
+            const option = document.createElement('option');
+            option.value = hall.name;
+            option.textContent = hall.name;
+            studyHallSelect.appendChild(option);
+        });
+    }
+
+    // Calculate monthly fees
+    async function calculateMonthlyFees() {
+        if (confirm('Calculate monthly fees for all active students?')) {
+            try {
+                const result = await apiCall('/fees/calculate-monthly', {
+                    method: 'POST'
+                });
+                showNotification(result.message);
+                updateDashboard();
+                updateDashboardStats();
+                loadStudents();
+            } catch (error) {
+                console.error('Error calculating fees:', error);
+            }
+        }
+    }
+
+    // Load upcoming fees - FIXED ENDPOINT
+    async function loadUpcomingFees() {
+        try {
+            document.getElementById('upcomingFeesLoading').style.display = 'block';
+            document.getElementById('upcomingFeesTable').style.display = 'none';
+            document.getElementById('upcomingFeesEmpty').style.display = 'none';
+            
+            // FIXED: Using correct endpoint
+            const students = await apiCall('/upcoming-fees');
+            
+            document.getElementById('upcomingFeesLoading').style.display = 'none';
+
+            if (students.length === 0) {
+                document.getElementById('upcomingFeesEmpty').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('upcomingFeesTable').style.display = 'table';
+            upcomingFeesTableBody.innerHTML = '';
+
+            students.forEach(student => {
+                const nextFeeDate = student.next_fee_date || 'Not set';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.hall}</td>
+                    <td>₹ ${student.monthly_fee || 0}</td>
+                    <td>₹ ${student.fee_due || 0}</td>
+                    <td>${formatDate(nextFeeDate)}</td>
+                    <td class="${student.status === 'Paid' ? 'status-paid' : 'status-pending'}">${student.status}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="editStudent(${student.id})"><i class="fas fa-edit"></i></button>
+                        ${!student.left_date ? `
+                            <button class="action-btn btn-warning" onclick="markStudentLeft(${student.id})"><i class="fas fa-sign-out-alt"></i></button>
+                        ` : `
+                            <button class="action-btn btn-success" onclick="reactivateStudent(${student.id})"><i class="fas fa-user-plus"></i></button>
+                        `}
+                    </td>
+                `;
+                upcomingFeesTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading upcoming fees:', error);
+            document.getElementById('upcomingFeesLoading').style.display = 'none';
+        }
+    }
+
+    // Mark student as left
+    async function markStudentLeft(studentId) {
+        const leftDate = prompt('Enter left date (YYYY-MM-DD) or leave empty for today:', new Date().toISOString().split('T')[0]);
+        if (leftDate !== null) {
+            try {
+                await apiCall(`/students/${studentId}/leave`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ left_date: leftDate || undefined })
+                });
+                showNotification('Student marked as left successfully');
+                loadStudents();
+                updateDashboardStats();
+            } catch (error) {
+                console.error('Error marking student as left:', error);
+            }
+        }
+    }
+
+    // Reactivate student
+    async function reactivateStudent(studentId) {
+        if (confirm('Reactivate this student?')) {
+            try {
+                await apiCall(`/students/${studentId}/reactivate`, {
+                    method: 'PUT'
+                });
+                showNotification('Student reactivated successfully');
+                loadStudents();
+                updateDashboardStats();
+            } catch (error) {
+                console.error('Error reactivating student:', error);
+            }
+        }
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN');
+    }
+
+    // Form submission handlers
+    addStudentForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        
+        const id = document.getElementById('editStudentId').value;
+        const studentData = {
+            name: document.getElementById('studentName').value,
+            cabin: document.getElementById('cabinNumber').value,
+            hall: document.getElementById('studyHall').value,
+            phone: document.getElementById('phoneNumber').value,
+            feePaid: parseInt(document.getElementById('feePaid').value),
+            feeDue: parseInt(document.getElementById('feeDue').value),
+            monthlyFee: parseInt(document.getElementById('monthlyFee').value) || 0,
+            joinDate: document.getElementById('joinDate').value
+        };
+
+        try {
+            if (id) {
+                studentData.leftDate = document.getElementById('leftDate').value || null;
+                await apiCall(`/students/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(studentData)
+                });
+                showNotification('Student updated successfully');
+            } else {
+                await apiCall('/students', {
+                    method: 'POST',
+                    body: JSON.stringify(studentData)
+                });
+                showNotification('Student added successfully');
+            }
+            
+            addStudentForm.reset();
+            document.getElementById('editStudentId').value = '';
+            document.getElementById('studentFormTitle').textContent = "Add Student";
+            // Set default join date to today
+            document.getElementById('joinDate').value = new Date().toISOString().split('T')[0];
+            showPage('studentsPage');
+        } catch (error) {
+            console.error('Error saving student:', error);
+        }
+    });
+
+    addHallForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        
+        const id = document.getElementById('editHallId').value;
+        const hallData = {
+            name: document.getElementById('hallName').value,
+            capacity: parseInt(document.getElementById('hallCapacity').value),
+            location: document.getElementById('hallLocation').value,
+            description: document.getElementById('hallDescription').value
+        };
+
+        try {
+            if (id) {
+                await apiCall(`/study-halls/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(hallData)
+                });
+                showNotification('Study hall updated successfully');
+            } else {
+                await apiCall('/study-halls', {
+                    method: 'POST',
+                    body: JSON.stringify(hallData)
+                });
+                showNotification('Study hall added successfully');
+            }
+            
+            addHallForm.reset();
+            document.getElementById('editHallId').value = '';
+            document.getElementById('hallFormTitle').textContent = "Add Study Hall";
+            showPage('studyHallsPage');
+        } catch (error) {
+            console.error('Error saving study hall:', error);
+        }
+    });
+
+    async function editStudent(id) {
+        try {
+            const student = await apiCall(`/students/${id}`);
+            
+            document.getElementById('editStudentId').value = student.id;
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('cabinNumber').value = student.cabin;
+            document.getElementById('studyHall').value = student.hall;
+            document.getElementById('phoneNumber').value = student.phone;
+            document.getElementById('feePaid').value = student.fee_paid;
+            document.getElementById('feeDue').value = student.fee_due;
+            document.getElementById('monthlyFee').value = student.monthly_fee || '';
+            document.getElementById('joinDate').value = student.join_date || '';
+            document.getElementById('leftDate').value = student.left_date || '';
+            
+            document.getElementById('studentFormTitle').textContent = "Edit Student";
+            await loadStudyHallsForSelect();
+            showPage('addStudentPage');
+        } catch (error) {
+            console.error('Error loading student for edit:', error);
+        }
+    }
+
+    async function deleteStudent(id) {
+        if (confirm("Are you sure you want to delete this student?")) {
+            try {
+                await apiCall(`/students/${id}`, { method: 'DELETE' });
+                showNotification('Student deleted successfully');
+                
+                // Refresh the current page
+                if (document.getElementById('dashboardPage').classList.contains('active')) {
+                    updateDashboard();
+                    updateDashboardStats();
+                } else if (document.getElementById('studentsPage').classList.contains('active')) {
+                    loadStudents();
+                }
+            } catch (error) {
+                console.error('Error deleting student:', error);
+            }
+        }
+    }
+
+    async function editHall(id) {
+        try {
+            const hall = await apiCall(`/study-halls/${id}`);
+            
+            document.getElementById('editHallId').value = hall.id;
+            document.getElementById('hallName').value = hall.name;
+            document.getElementById('hallCapacity').value = hall.capacity;
+            document.getElementById('hallLocation').value = hall.location;
+            document.getElementById('hallDescription').value = hall.description || '';
+            document.getElementById('hallFormTitle').textContent = "Edit Study Hall";
+            showPage('addHallPage');
+        } catch (error) {
+            console.error('Error loading hall for edit:', error);
+        }
+    }
+
+    async function deleteHall(id) {
+        if (confirm("Are you sure you want to delete this hall?")) {
+            try {
+                await apiCall(`/study-halls/${id}`, { method: 'DELETE' });
+                showNotification('Study hall deleted successfully');
+                loadStudyHalls();
+            } catch (error) {
+                console.error('Error deleting hall:', error);
+                if (error.message.includes('Cannot delete study hall with students')) {
+                    showNotification('Cannot delete study hall with students assigned to it', 'error');
+                }
+            }
+        }
+    }
+
+    async function updateReports() {
+        try {
+            // Update dashboard stats
+            const dashboardData = await apiCall('/dashboard');
+            
+            document.getElementById('reportTotalStudents').textContent = dashboardData.totalStudents;
+            document.getElementById('reportTotalHalls').textContent = dashboardData.totalHalls;
+            document.getElementById('reportTotalFees').textContent = `₹ ${dashboardData.totalFees}`;
+            document.getElementById('reportPendingFees').textContent = `₹ ${dashboardData.pendingFees}`;
+
+            // Update fee collection report
+            document.getElementById('feeReportLoading').style.display = 'block';
+            document.getElementById('feeReportTable').style.display = 'none';
+            document.getElementById('feeReportEmpty').style.display = 'none';
+            
+            const feeReportData = await apiCall('/reports/fee-collection');
+            
+            document.getElementById('feeReportLoading').style.display = 'none';
+            
+            if (feeReportData.length === 0) {
+                document.getElementById('feeReportEmpty').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('feeReportTable').style.display = 'table';
+            feeReportTableBody.innerHTML = '';
+
+            feeReportData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.hall}</td>
+                    <td>${row.totalStudents}</td>
+                    <td>₹ ${row.feesCollected}</td>
+                    <td>₹ ${row.feesPending}</td>
+                    <td>${row.collectionRate}</td>
+                `;
+                feeReportTableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error updating reports:', error);
+            document.getElementById('feeReportLoading').style.display = 'none';
+        }
+    }
+
+    exportReportBtn.addEventListener('click', async () => {
+        try {
+            const feeReportData = await apiCall('/reports/fee-collection');
+            
+            let csv = "Study Hall,Total Students,Fees Collected,Fees Pending,Collection Rate\n";
+            feeReportData.forEach(row => {
+                csv += `"${row.hall}",${row.totalStudents},${row.feesCollected},${row.feesPending},"${row.collectionRate}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: "text/csv" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "fee_report.csv";
+            link.click();
+            showNotification('Report exported successfully');
+        } catch (error) {
+            console.error('Error exporting report:', error);
+        }
+    });
+
+    // Install prompt handling
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallPrompt();
+    });
+
+    function showInstallPrompt() {
+        if (deferredPrompt && !isRunningStandalone()) {
+            const installBtn = document.createElement('button');
+            installBtn.innerHTML = '<i class="fas fa-download"></i> Install App';
+            installBtn.className = 'btn-success';
+            installBtn.style.position = 'fixed';
+            installBtn.style.top = '70px';
+            installBtn.style.right = '20px';
+            installBtn.style.zIndex = '1000';
+            installBtn.onclick = installPWA;
+            
+            document.body.appendChild(installBtn);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (installBtn.parentNode) {
+                    installBtn.parentNode.removeChild(installBtn);
+                }
+            }, 10000);
+        }
+    }
+
+    async function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+        }
+    }
+
+    // Online/Offline detection
+    window.addEventListener('online', () => {
+        document.getElementById('offlineIndicator').style.display = 'none';
+        console.log('App is online');
+    });
+
+    window.addEventListener('offline', () => {
+        document.getElementById('offlineIndicator').style.display = 'block';
+        console.log('App is offline');
+    });
+
+    // Initialize PWA features when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        updateUIForStandalone();
+        setActiveNav('dashboardPage');
+        
+        // Set default join date to today
+        document.getElementById('joinDate').value = new Date().toISOString().split('T')[0];
+        
+        // Check if app is already installed
+        if (isRunningStandalone()) {
+            console.log('App is running in standalone mode');
+        }
+        
+        // Initial data load
+        updateDashboard();
+        updateDashboardStats();
+        loadStudyHallsForSelect();
+    });
+</script>
+</body>
+</html>

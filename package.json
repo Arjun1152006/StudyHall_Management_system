@@ -1,0 +1,15 @@
+{
+  "name": "study-hall-management",
+  "version": "2.0.0",
+  "description": "Study Hall Management System with Advanced Features",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5"
+  }
+}
