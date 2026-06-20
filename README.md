@@ -167,6 +167,13 @@ This project helped me gain practical experience in:
 * Advanced Analytics Dashboard
 
 ---
+
+## Live demo
+
+---
+https://studyhallmanagementsystem-sm.up.railway.app/  
+
+---
  ## Project Screenshots
 
   ---
