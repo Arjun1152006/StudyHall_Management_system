@@ -1,5 +1,4 @@
 # 🚀 Study Hall Management System
-
 A Full Stack Study Hall Management System built using **React, Spring Boot, REST APIs, and MySQL** to efficiently manage students, study halls, fee collection, and administrative operations.
 
 ## 📌 Features
