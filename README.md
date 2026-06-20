@@ -167,6 +167,17 @@ This project helped me gain practical experience in:
 * Advanced Analytics Dashboard
 
 ---
+ ## Project Screenshots
+
+  ---
+<img width="1903" height="911" alt="Screenshot 2026-06-20 183557" src="https://github.com/user-attachments/assets/0a3dd24c-fd10-4f58-9b18-86a7911ebe03" />
+<img width="1907" height="911" alt="Screenshot 2026-06-20 183639" src="https://github.com/user-attachments/assets/0c77f57f-7de8-49b4-a989-cd70e0fac807" />
+<img width="1912" height="910" alt="Screenshot 2026-06-20 183705" src="https://github.com/user-attachments/assets/53c1b7c0-9f18-4448-9cf6-78d02c948147" />
+<img width="1907" height="915" alt="Screenshot 2026-06-20 183753" src="https://github.com/user-attachments/assets/9c15aec5-2cbf-4293-8e35-c24e56992072" />
+<img width="1913" height="907" alt="Screenshot 2026-06-20 183815" src="https://github.com/user-attachments/assets/76f0df99-cd22-4cbd-8bf7-5ff401d67256" />
+<img width="1907" height="905" alt="Screenshot 2026-06-20 183840" src="https://github.com/user-attachments/assets/7fed8bb8-4408-4875-9212-dfd4d71f4d75" />
+<img width="1918" height="911" alt="Screenshot 2026-06-20 183859" src="https://github.com/user-attachments/assets/5ba549eb-6d33-4793-b664-31dd7bd33d48" />
+
 
 ## 👨‍💻 Author
 
